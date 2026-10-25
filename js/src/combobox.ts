@@ -262,6 +262,13 @@ class Combobox extends BaseComponent {
           this.hide()
           this._toggle.focus()
         }
+
+        // Enter in a text field submits its form. Do not submit the form while
+        // the user filters the list. Leave the Enter that commits an IME
+        // composition to the IME.
+        if (event.key === ENTER_KEY && !event.isComposing) {
+          event.preventDefault()
+        }
       })
     }
   }

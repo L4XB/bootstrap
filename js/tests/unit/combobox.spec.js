@@ -420,6 +420,35 @@ describe('Combobox', () => {
       expect(menuEl).not.toHaveClass('show')
       expect(document.activeElement).toEqual(toggleEl)
     })
+
+    it('should keep Enter in the search input from submitting the form', () => {
+      const { combobox, menuEl } = makeCombobox({ search: true }, `<form>${searchMarkup()}</form>`)
+      const searchEl = menuEl.querySelector('.combobox-search-input')
+      combobox.show()
+
+      // The default action of Enter in a text field is the implicit submission of its form
+      const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })
+      searchEl.dispatchEvent(enterEvent)
+
+      expect(enterEvent.defaultPrevented).toBeTrue()
+      expect(menuEl).toHaveClass('show')
+    })
+
+    it('should not prevent the Enter that commits an IME composition in the search input', () => {
+      const { combobox, menuEl } = makeCombobox({ search: true }, `<form>${searchMarkup()}</form>`)
+      const searchEl = menuEl.querySelector('.combobox-search-input')
+      combobox.show()
+
+      const enterEvent = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        isComposing: true,
+        bubbles: true,
+        cancelable: true
+      })
+      searchEl.dispatchEvent(enterEvent)
+
+      expect(enterEvent.defaultPrevented).toBeFalse()
+    })
   })
 
   describe('keyboard on the toggle', () => {
