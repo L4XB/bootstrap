@@ -392,6 +392,48 @@ describe('Dialog', () => {
       })
     })
 
+    it('should not close dialog when a press starts inside the dialog and ends on the backdrop', async () => {
+      fixtureEl.innerHTML = [
+        '<dialog class="dialog">',
+        '  <div class="dialog-body"><input type="text" value="Text to select"></div>',
+        '</dialog>'
+      ].join('')
+
+      const dialogEl = fixtureEl.querySelector('.dialog')
+      const dialog = new Dialog(dialogEl)
+      const spy = spyOn(dialog, 'hide')
+
+      await dialog.show()
+
+      // A text selection dragged from the field onto the backdrop fires
+      // `click` on the dialog element
+      fixtureEl.querySelector('input').dispatchEvent(createEvent('mousedown', { bubbles: true }))
+      dialogEl.dispatchEvent(createEvent('click'))
+
+      expect(spy).not.toHaveBeenCalled()
+    })
+
+    it('should close dialog on a backdrop press after a press that started inside the dialog', async () => {
+      fixtureEl.innerHTML = [
+        '<dialog class="dialog">',
+        '  <div class="dialog-body">Content</div>',
+        '</dialog>'
+      ].join('')
+
+      const dialogEl = fixtureEl.querySelector('.dialog')
+      const dialog = new Dialog(dialogEl)
+      const spy = spyOn(dialog, 'hide')
+
+      await dialog.show()
+
+      fixtureEl.querySelector('.dialog-body').dispatchEvent(createEvent('mousedown', { bubbles: true }))
+      dialogEl.dispatchEvent(createEvent('click'))
+      dialogEl.dispatchEvent(createEvent('mousedown'))
+      dialogEl.dispatchEvent(createEvent('click'))
+
+      expect(spy).toHaveBeenCalledTimes(1)
+    })
+
     it('should remove dialog-open when the dialog is closed during the exit transition', () => {
       return new Promise(resolve => {
         fixtureEl.innerHTML = '<dialog class="dialog"></dialog>'

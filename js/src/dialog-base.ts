@@ -335,9 +335,22 @@ class DialogBase extends BaseComponent {
       this.hide()
     })
 
+    // A press can start inside the dialog and end on the backdrop, for example
+    // when the user drags a text selection out of a field. The browser then
+    // fires `click` on the dialog element. Only a press that starts on the
+    // backdrop closes the dialog.
+    let pressStartedInside = false
+
+    EventHandler.on(this._element, `mousedown${eventKey}`, event => {
+      pressStartedInside = event.target !== this._element
+    })
+
     // Handle backdrop clicks — only applies to modal dialogs
     EventHandler.on(this._element, `click${eventKey}`, event => {
-      if (event.target !== this._element || !this._openedAsModal) {
+      const startedInside = pressStartedInside
+      pressStartedInside = false
+
+      if (event.target !== this._element || !this._openedAsModal || startedInside) {
         return
       }
 
