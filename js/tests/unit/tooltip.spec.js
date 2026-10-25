@@ -888,6 +888,41 @@ describe('Tooltip', () => {
       })
     })
 
+    it('should not hide a tooltip if the cursor crosses a gap between the trigger and the tip', async () => {
+      fixtureEl.innerHTML = '<a href="#" rel="tooltip" title="Another tooltip" data-bs-delay=\'{"show":0,"hide":50}\'>trigger</a>'
+
+      const tooltipEl = fixtureEl.querySelector('a')
+      const tooltip = new Tooltip(tooltipEl)
+
+      const shown = new Promise(resolve => {
+        tooltipEl.addEventListener('shown.bs.tooltip', resolve, { once: true })
+      })
+      tooltipEl.dispatchEvent(createEvent('mouseover'))
+      await shown
+
+      const tipEl = tooltip._getTipElement()
+
+      // The cursor leaves the trigger for the page, and then enters the tip
+      const leaveTriggerEvent = createEvent('mouseout')
+      Object.defineProperty(leaveTriggerEvent, 'relatedTarget', {
+        value: document.body
+      })
+      tooltipEl.dispatchEvent(leaveTriggerEvent)
+
+      const enterTipEvent = createEvent('mouseover')
+      Object.defineProperty(enterTipEvent, 'relatedTarget', {
+        value: document.body
+      })
+      tipEl.dispatchEvent(enterTipEvent)
+
+      await new Promise(resolve => {
+        setTimeout(resolve, 100)
+      })
+
+      expect(tipEl).toHaveClass('show')
+      expect(tipEl.isConnected).toBeTrue()
+    })
+
     it('should hide a tooltip when the cursor leaves the tip element', () => {
       return new Promise(resolve => {
         fixtureEl.innerHTML = '<a href="#" rel="tooltip" title="Another tooltip">trigger</a>'

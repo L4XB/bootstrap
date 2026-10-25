@@ -709,8 +709,18 @@ class Tooltip extends BaseComponent {
 
     for (const name of trigger.split(' ')) {
       if (name === TRIGGER_HOVER || name === TRIGGER_FOCUS) {
-        const [, eventOut] = this._getTriggerEvents(name)
+        const [eventIn, eventOut] = this._getTriggerEvents(name)
         EventHandler.on(tip, eventOut, this._tipEventOut)
+
+        // The tip sits a few pixels from the trigger. The pointer leaves the
+        // trigger before it reaches the tip, and that starts a hide. When the
+        // pointer enters the tip, stop that hide.
+        if (name === TRIGGER_HOVER) {
+          EventHandler.on(tip, eventIn, () => {
+            this._activeTrigger[TRIGGER_HOVER] = true
+            this._enter()
+          })
+        }
       }
     }
   }
