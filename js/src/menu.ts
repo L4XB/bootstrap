@@ -961,11 +961,14 @@ class Menu extends BaseComponent {
       }
     }
 
-    if (key === HOME_KEY || key === END_KEY) {
+    // A closed menu has no items to move to, so Home and End keep their
+    // default action. The toggle is not inside `.menu`, so it uses the root
+    // menu, as arrow keys do in `_selectMenuItem`.
+    if ((key === HOME_KEY || key === END_KEY) && this._isShown()) {
       event.preventDefault()
       event.stopPropagation()
 
-      const currentMenu = (target as Element).closest(SELECTOR_MENU)!
+      const currentMenu = (target as Element).closest(SELECTOR_MENU) || this._menu
       const items = this._getItemsInMenu(currentMenu)
 
       if (items.length) {

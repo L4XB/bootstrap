@@ -4465,6 +4465,58 @@ describe('Menu', () => {
         menu.show()
       })
     })
+
+    it('should focus the last and first item when End and Home are pressed on the toggle of an open menu', async () => {
+      fixtureEl.innerHTML = [
+        '<div>',
+        '  <button class="btn" data-bs-toggle="menu">Menu</button>',
+        '  <div class="menu">',
+        '    <a id="first" class="menu-item" href="#">First</a>',
+        '    <a id="last" class="menu-item" href="#">Last</a>',
+        '  </div>',
+        '</div>'
+      ].join('')
+
+      const btnMenu = fixtureEl.querySelector('[data-bs-toggle="menu"]')
+      const menu = new Menu(btnMenu)
+
+      await menu.show()
+      btnMenu.focus()
+
+      const endEvent = createEvent('keydown')
+      endEvent.key = 'End'
+      btnMenu.dispatchEvent(endEvent)
+
+      expect(document.activeElement).toEqual(fixtureEl.querySelector('#last'))
+
+      btnMenu.focus()
+      const homeEvent = createEvent('keydown')
+      homeEvent.key = 'Home'
+      btnMenu.dispatchEvent(homeEvent)
+
+      expect(document.activeElement).toEqual(fixtureEl.querySelector('#first'))
+    })
+
+    it('should leave Home and End to the page on the toggle of a closed menu', () => {
+      fixtureEl.innerHTML = [
+        '<div>',
+        '  <button class="btn" data-bs-toggle="menu">Menu</button>',
+        '  <div class="menu">',
+        '    <a class="menu-item" href="#">First</a>',
+        '  </div>',
+        '</div>'
+      ].join('')
+
+      const btnMenu = fixtureEl.querySelector('[data-bs-toggle="menu"]')
+      btnMenu.focus()
+
+      const homeEvent = createEvent('keydown', { cancelable: true })
+      homeEvent.key = 'Home'
+      btnMenu.dispatchEvent(homeEvent)
+
+      expect(homeEvent.defaultPrevented).toBeFalse()
+      expect(fixtureEl.querySelector('.menu')).not.toHaveClass('show')
+    })
   })
 
   describe('ArrowLeft to close submenu', () => {
