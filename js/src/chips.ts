@@ -437,6 +437,14 @@ class Chips extends BaseComponent {
   }
 
   protected _handleInputKeydown(event: BootstrapEvent): void {
+    // During an IME composition, Enter confirms the conversion and Escape
+    // cancels it. Leave these keys to the IME. An IME marks the key events it
+    // processes with keyCode 229, also when the browser fires the confirming
+    // Enter after `compositionend`.
+    if (event.isComposing || event.keyCode === 229) {
+      return
+    }
+
     const { key } = event
 
     switch (key) {

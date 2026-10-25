@@ -431,6 +431,40 @@ describe('Chips', () => {
       expect(input.value).toEqual('')
     })
 
+    it('should not create a chip on the Enter that confirms an IME conversion', () => {
+      const { chips } = makeChips()
+      const input = chips._input
+      input.value = '東京'
+
+      keydown(input, 'Enter', { isComposing: true })
+
+      expect(chips.getValues()).toEqual([])
+      expect(input.value).toEqual('東京')
+    })
+
+    it('should not create a chip on an Enter that the IME processed after the composition', () => {
+      const { chips } = makeChips()
+      const input = chips._input
+      input.value = '東京'
+
+      keydown(input, 'Enter', { keyCode: 229 })
+
+      expect(chips.getValues()).toEqual([])
+      expect(input.value).toEqual('東京')
+    })
+
+    it('should keep the input on the Escape that cancels an IME conversion', () => {
+      const { chips } = makeChips()
+      const input = chips._input
+      input.focus()
+      input.value = '東京'
+
+      keydown(input, 'Escape', { isComposing: true })
+
+      expect(input.value).toEqual('東京')
+      expect(document.activeElement).toEqual(input)
+    })
+
     it('should select the last chip on ArrowLeft at the start of an empty input', () => {
       const { chips } = makeChips()
       chips.add('alpha')
