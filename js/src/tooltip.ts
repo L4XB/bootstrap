@@ -286,7 +286,7 @@ class Tooltip extends BaseComponent {
 
     const tip = this._getTipElement()
 
-    this._element.setAttribute('aria-describedby', tip.getAttribute('id')!)
+    this._setDescribedBy(tip.id, true)
 
     let { container } = this._config as TooltipConfig & { container: Element }
     const closestDialog = this._element.closest('dialog[open]')
@@ -369,7 +369,7 @@ class Tooltip extends BaseComponent {
         this._disposeFloating()
       }
 
-      this._element.removeAttribute('aria-describedby')
+      this._setDescribedBy(tip.id, false)
       EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN))
     }
 
@@ -988,6 +988,24 @@ class Tooltip extends BaseComponent {
     // const keysWithDifferentValues = Object.entries(this._config).filter(entry => this.constructor.Default[entry[0]] !== this._config[entry[0]])
     // `Object.fromEntries(keysWithDifferentValues)`
     return config
+  }
+
+  // The trigger can already point `aria-describedby` at other ids, such as the
+  // help text of a form field. Add or remove only the id of the tip.
+  protected _setDescribedBy(tipId: string, add: boolean): void {
+    const ids = (this._element.getAttribute('aria-describedby') || '')
+      .split(/\s+/)
+      .filter(id => id && id !== tipId)
+
+    if (add) {
+      ids.push(tipId)
+    }
+
+    if (ids.length > 0) {
+      this._element.setAttribute('aria-describedby', ids.join(' '))
+    } else {
+      this._element.removeAttribute('aria-describedby')
+    }
   }
 
   protected _disposeFloating(): void {

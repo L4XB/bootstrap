@@ -1081,6 +1081,23 @@ describe('Tooltip', () => {
       })
     })
 
+    it('should keep the other aria-describedby ids of the trigger when the tooltip shows and hides', async () => {
+      fixtureEl.innerHTML = [
+        '<input type="password" aria-describedby="passwordHelp" title="Use 8 or more characters">',
+        '<div id="passwordHelp">Your password must be 8-20 characters long.</div>'
+      ].join('')
+
+      const tooltipEl = fixtureEl.querySelector('input')
+      const tooltip = new Tooltip(tooltipEl)
+
+      await tooltip.show()
+      const tipId = tooltip.tip.id
+      expect(tooltipEl.getAttribute('aria-describedby')).toEqual(`passwordHelp ${tipId}`)
+
+      await tooltip.hide()
+      expect(tooltipEl.getAttribute('aria-describedby')).toEqual('passwordHelp')
+    })
+
     it('should hide a tooltip on mobile', () => {
       return new Promise(resolve => {
         fixtureEl.innerHTML = '<a href="#" rel="tooltip" title="Another tooltip"></a>'
