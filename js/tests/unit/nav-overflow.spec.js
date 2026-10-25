@@ -575,6 +575,53 @@ describe('NavOverflow', () => {
       navOverflow.dispose()
     })
 
+    it('should not overflow items that fit when the toggle is hidden', () => {
+      fixtureEl.innerHTML = [
+        '<div class="nav-overflow" style="width: 300px;" data-bs-toggle="nav-overflow">',
+        '  <ul class="nav" style="display: flex;">',
+        '    <li class="nav-item" style="flex: 0 0 100px; width: 100px;"><a class="nav-link" href="#">Link 1</a></li>',
+        '    <li class="nav-item" style="flex: 0 0 100px; width: 100px;"><a class="nav-link" href="#">Link 2</a></li>',
+        '    <li class="nav-item" style="flex: 0 0 100px; width: 100px;"><a class="nav-link" href="#">Link 3</a></li>',
+        '  </ul>',
+        '</div>'
+      ].join('')
+
+      const wrapperEl = fixtureEl.querySelector('[data-bs-toggle="nav-overflow"]')
+      const navOverflow = new NavOverflow(wrapperEl)
+
+      // The three items fill the wrapper, and the toggle shows only for an overflow
+      const hiddenItems = wrapperEl.querySelectorAll('.nav-item[data-bs-nav-overflow="true"]')
+      expect(hiddenItems.length).toEqual(0)
+      expect(wrapperEl.querySelector('.nav-overflow-item')).toHaveClass('d-none')
+
+      navOverflow.dispose()
+    })
+
+    it('should restore every item when the wrapper widens to fit them without the toggle', () => {
+      fixtureEl.innerHTML = [
+        '<div class="nav-overflow" style="width: 250px;" data-bs-toggle="nav-overflow">',
+        '  <ul class="nav" style="display: flex;">',
+        '    <li class="nav-item" style="flex: 0 0 100px; width: 100px;"><a class="nav-link" href="#">Link 1</a></li>',
+        '    <li class="nav-item" style="flex: 0 0 100px; width: 100px;"><a class="nav-link" href="#">Link 2</a></li>',
+        '    <li class="nav-item" style="flex: 0 0 100px; width: 100px;"><a class="nav-link" href="#">Link 3</a></li>',
+        '  </ul>',
+        '</div>'
+      ].join('')
+
+      const wrapperEl = fixtureEl.querySelector('[data-bs-toggle="nav-overflow"]')
+      const navOverflow = new NavOverflow(wrapperEl)
+      expect(wrapperEl.querySelector('.nav-overflow-item')).not.toHaveClass('d-none')
+
+      wrapperEl.style.width = '300px'
+      navOverflow.update()
+
+      const hiddenItems = wrapperEl.querySelectorAll('.nav-item[data-bs-nav-overflow="true"]')
+      expect(hiddenItems.length).toEqual(0)
+      expect(wrapperEl.querySelector('.nav-overflow-item')).toHaveClass('d-none')
+
+      navOverflow.dispose()
+    })
+
     it('should reuse existing overflow toggle and menu from markup', () => {
       fixtureEl.innerHTML = [
         '<div class="nav-overflow" data-bs-toggle="nav-overflow">',

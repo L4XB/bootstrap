@@ -335,6 +335,11 @@ class NavOverflow extends BaseComponent {
     const overflowWidth = overflowItem ? overflowItem.offsetWidth + gap : 0
     const limit = availableWidth - keepWidth - overflowWidth
 
+    // The toggle shows only when an item overflows. If every item fits
+    // without the toggle, nothing overflows. n items need n - 1 gaps.
+    const neededWidth = candidates.reduce((sum, item) => sum + item.offsetWidth + gap, keepWidth) - gap
+    const fitsWithoutToggle = neededWidth <= availableWidth + 1
+
     let usedWidth = 0
     let itemsToOverflow = []
 
@@ -342,7 +347,7 @@ class NavOverflow extends BaseComponent {
       usedWidth += item.offsetWidth + gap
 
       // Allow a pixel of slack for sub-pixel layout rounding
-      if (usedWidth > limit + 1) {
+      if (!fitsWithoutToggle && usedWidth > limit + 1) {
         itemsToOverflow.push(item)
       }
     }
